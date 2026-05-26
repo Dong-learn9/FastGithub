@@ -85,18 +85,22 @@ namespace FastGithub
 
         /// <summary>
         /// 释放 appsettings 配置文件
-        /// 始终覆盖释放，确保版本更新后配置与程序匹配
+        /// 仅在不存在时释放，保留用户自定义修改
         /// </summary>
         private static void ExtractAppsettings(Assembly assembly, string[] resourceNames, string baseDirectory)
         {
-            // 释放 appsettings.json（始终覆盖）
-            var appsettingsResourceName = FindResourceName(resourceNames, "appsettings.json");
-            if (appsettingsResourceName != null)
+            // 释放 appsettings.json（仅在不存在时释放）
+            var appsettingsPath = Path.Combine(baseDirectory, "appsettings.json");
+            if (!File.Exists(appsettingsPath))
             {
-                ExtractResource(assembly, appsettingsResourceName, Path.Combine(baseDirectory, "appsettings.json"));
+                var appsettingsResourceName = FindResourceName(resourceNames, "appsettings.json");
+                if (appsettingsResourceName != null)
+                {
+                    ExtractResource(assembly, appsettingsResourceName, appsettingsPath);
+                }
             }
 
-            // 释放 appsettings/*.json（始终覆盖）
+            // 释放 appsettings/*.json（仅在不存在时释放）
             var appsettingsDir = Path.Combine(baseDirectory, "appsettings");
             Directory.CreateDirectory(appsettingsDir);
 
@@ -110,11 +114,14 @@ namespace FastGithub
             foreach (var prefix in appsettingPrefixes)
             {
                 var fileName = $"{prefix}.json";
-                var fullResourceName = FindResourceName(resourceNames, fileName);
-                if (fullResourceName != null)
+                var targetPath = Path.Combine(appsettingsDir, fileName);
+                if (!File.Exists(targetPath))
                 {
-                    var targetPath = Path.Combine(appsettingsDir, fileName);
-                    ExtractResource(assembly, fullResourceName, targetPath);
+                    var fullResourceName = FindResourceName(resourceNames, fileName);
+                    if (fullResourceName != null)
+                    {
+                        ExtractResource(assembly, fullResourceName, targetPath);
+                    }
                 }
             }
         }
