@@ -32,7 +32,7 @@ namespace FastGithub.DomainResolve
 
         private readonly ConcurrentDictionary<string, SemaphoreSlim> semaphoreSlims = new();
         private readonly IMemoryCache dnsStateCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-        private readonly IMemoryCache dnsLookupCache;
+        private readonly IMemoryCache dnsLookupCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
 
         private readonly TimeSpan stateExpiration = TimeSpan.FromMinutes(5d);
         private readonly TimeSpan minTimeToLive = TimeSpan.FromSeconds(30d);
@@ -57,24 +57,19 @@ namespace FastGithub.DomainResolve
             this.dnscryptProxy = dnscryptProxy;
             this.fastGithubConfig = fastGithubConfig;
             this.logger = logger;
-
-            // 缓存过期时清理对应的信号量，防止内存泄漏
-            var cacheOptions = new MemoryCacheOptions();
-            cacheOptions.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration
-            {
-                EvictionCallback = OnDnsLookupCacheEvicted
-            });
-            this.dnsLookupCache = new MemoryCache(Options.Create(cacheOptions));
         }
 
         /// <summary>
-        /// DNS查询缓存过期回调，清理不再需要的信号量
+        /// 清理过期的信号量，防止内存泄漏
         /// </summary>
-        private void OnDnsLookupCacheEvicted(object key, object? value, EvictionReason reason, object? state)
+        internal void CompactSemaphoreSlims()
         {
-            if (key is string cacheKey)
+            foreach (var key in this.semaphoreSlims.Keys)
             {
-                this.semaphoreSlims.TryRemove(cacheKey, out _);
+                if (this.dnsLookupCache.TryGetValue(key, out _) == false)
+                {
+                    this.semaphoreSlims.TryRemove(key, out _);
+                }
             }
         }
 

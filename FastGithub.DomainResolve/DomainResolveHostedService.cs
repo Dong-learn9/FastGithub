@@ -14,22 +14,28 @@ namespace FastGithub.DomainResolve
     {
         private readonly DnscryptProxy dnscryptProxy;
         private readonly IDomainResolver domainResolver;
+        private readonly DnsClient dnsClient;
         private readonly ILogger<DomainResolveHostedService> logger;
         private readonly TimeSpan dnscryptProxyMaxDelay = TimeSpan.FromSeconds(5d);
         private readonly TimeSpan testPeriodTimeSpan = TimeSpan.FromSeconds(1d);
+        private readonly TimeSpan compactInterval = TimeSpan.FromMinutes(10d);
 
         /// <summary>
         /// 域名解析后台服务
         /// </summary>
         /// <param name="dnscryptProxy"></param>
         /// <param name="domainResolver"></param>
+        /// <param name="dnsClient"></param>
+        /// <param name="logger"></param>
         public DomainResolveHostedService(
             DnscryptProxy dnscryptProxy,
             IDomainResolver domainResolver,
+            DnsClient dnsClient,
             ILogger<DomainResolveHostedService> logger)
         {
             this.dnscryptProxy = dnscryptProxy;
             this.domainResolver = domainResolver;
+            this.dnsClient = dnsClient;
             this.logger = logger;
         }
 
@@ -45,9 +51,18 @@ namespace FastGithub.DomainResolve
                 await this.dnscryptProxy.StartAsync(stoppingToken);
                 await this.WaitForDnscryptProxyAsync(stoppingToken);
 
+                var lastCompactTime = DateTime.UtcNow;
                 while (stoppingToken.IsCancellationRequested == false)
                 {
                     await this.domainResolver.TestSpeedAsync(stoppingToken);
+
+                    // 定期清理过期的信号量，防止内存泄漏
+                    if (DateTime.UtcNow - lastCompactTime > this.compactInterval)
+                    {
+                        this.dnsClient.CompactSemaphoreSlims();
+                        lastCompactTime = DateTime.UtcNow;
+                    }
+
                     await Task.Delay(this.testPeriodTimeSpan, stoppingToken);
                 }
             }
