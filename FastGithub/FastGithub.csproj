@@ -1,4 +1,4 @@
-﻿﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<AssemblyName>fastgithub</AssemblyName>
@@ -26,9 +26,6 @@
 
 	<ItemGroup>
 		<None Include="../README.md" Link="README.md">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="../README.html" Link="README.html">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="../LICENSE" Link="LICENSE">
