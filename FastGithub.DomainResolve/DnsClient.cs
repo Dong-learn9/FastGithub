@@ -84,7 +84,7 @@ namespace FastGithub.DomainResolve
         {
             var hashSet = new HashSet<IPAddress>();
 
-            // 并行查询所有DNS服务器，谁先返回用谁，合并去重结果
+            // 收集所有可用的DNS服务器
             var dnsServers = new List<IPEndPoint>();
             await foreach (var dns in this.GetDnsServersAsync(cancellationToken))
             {
@@ -96,34 +96,18 @@ namespace FastGithub.DomainResolve
                 yield break;
             }
 
-            // 并行向所有DNS服务器发起查询
+            // 并行向所有DNS服务器发起查询，合并去重结果
             var lookupTasks = dnsServers.Select(dns => this.LookupAsync(dns, endPoint, fastSort, cancellationToken)).ToArray();
+            var completedResults = await Task.WhenAll(lookupTasks);
 
-            // 使用Task.WhenAny逐个收集最先返回的结果
-            var remainingTasks = new HashSet<Task<IList<IPAddress>>>(lookupTasks);
-            while (remainingTasks.Count > 0)
+            foreach (var addresses in completedResults)
             {
-                var completedTask = await Task.WhenAny(remainingTasks);
-                remainingTasks.Remove(completedTask);
-
-                IList<IPAddress>? addresses = null;
-                try
+                if (addresses == null) continue;
+                foreach (var address in addresses)
                 {
-                    addresses = await completedTask;
-                }
-                catch
-                {
-                    // 单个DNS服务器查询失败不影响其他
-                }
-
-                if (addresses != null)
-                {
-                    foreach (var address in addresses)
+                    if (hashSet.Add(address))
                     {
-                        if (hashSet.Add(address))
-                        {
-                            yield return address;
-                        }
+                        yield return address;
                     }
                 }
             }
@@ -138,7 +122,6 @@ namespace FastGithub.DomainResolve
             var cryptDns = this.dnscryptProxy.LocalEndPoint;
             if (cryptDns != null)
             {
-                yield return cryptDns;
                 yield return cryptDns;
             }
 

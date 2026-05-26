@@ -41,7 +41,9 @@ namespace FastGithub.DomainResolve
             this.logger = logger;
 
             // 从磁盘恢复域名及其上次的IP地址缓存
-            foreach (var kv in persistence.ReadDnsEndPointsAsync().GetAwaiter().GetResult())
+            // 使用 Task.Run 避免在构造函数中同步阻塞异步方法
+            var cachedEndPoints = Task.Run(() => this.persistence.ReadDnsEndPointsAsync()).GetAwaiter().GetResult();
+            foreach (var kv in cachedEndPoints)
             {
                 this.dnsEndPointAddress.TryAdd(kv.Key, kv.Value);
             }

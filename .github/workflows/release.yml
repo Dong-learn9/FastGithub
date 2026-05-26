@@ -55,8 +55,8 @@ jobs:
     needs: validate  
     runs-on: ${{ matrix.os }}  
     strategy:  
-      matrix:  
-        include:  
+      matrix:
+        include:
           - os: windows-latest
             runtime: win-x64
             artifact-name: fastgithub-win-x64
@@ -66,12 +66,6 @@ jobs:
           - os: ubuntu-latest
             runtime: linux-arm64
             artifact-name: fastgithub-linux-arm64
-          - os: macos-13
-            runtime: osx-x64
-            artifact-name: fastgithub-osx-x64
-          - os: macos-latest
-            runtime: osx-arm64
-            artifact-name: fastgithub-osx-arm64
   
     steps:  
     - name: Checkout code  
@@ -92,8 +86,6 @@ jobs:
           -r ${{ matrix.runtime }} \
           --self-contained true \
           -p:PublishSingleFile=true \
-          -p:PublishTrimmed=true \
-          -p:TrimMode=partial \
           -p:EnableCompressionInSingleFile=true \
           -o ./publish/${{ matrix.runtime }}
   
@@ -166,13 +158,11 @@ jobs:
           | Windows x64 | `fastgithub-win-x64.zip` |
           | Linux x64 | `fastgithub-linux-x64.tar.gz` |
           | Linux ARM64 | `fastgithub-linux-arm64.tar.gz` |
-          | macOS x64 | `fastgithub-osx-x64.tar.gz` |
-          | macOS ARM64 | `fastgithub-osx-arm64.tar.gz` |
 
           ### 使用说明
           - **单文件版**：下载后解压，直接运行 `fastgithub` 即可，首次运行自动释放所需依赖
           - **Windows**：双击 `fastgithub.exe` 或 `FastGithub.UI.exe`（带托盘图标）
-          - **Linux/macOS**：终端运行 `./fastgithub`，需设置系统代理为 `http://127.0.0.1:38457`
+          - **Linux**：终端运行 `./fastgithub`，需设置系统代理为 `http://127.0.0.1:38457`
           - 首次使用需安装并信任 CA 证书
           - Git 用户需执行 `git config --global http.sslverify false`
 
