@@ -13,11 +13,9 @@
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 
-	<!-- Trimming 兼容性：抑制第三方库的 trimming 分析器警告和错误 -->
+	<!-- 禁用 AOT/Trimming 分析器（仅在 dotnet publish 时由命令行控制裁剪） -->
 	<PropertyGroup>
-		<NoWarn>$(NoWarn);IL2026;IL2087;IL2072;IL2057;IL2067;IL2075;IL2091;IL3000;IL3001</NoWarn>
-		<TrimmerSingleWarn>false</TrimmerSingleWarn>
-		<!-- 不将 trimming 警告视为错误 -->
-		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<EnableAotAnalyzer>false</EnableAotAnalyzer>
+		<IsAotCompatible>false</IsAotCompatible>
 	</PropertyGroup>
 </Project>
