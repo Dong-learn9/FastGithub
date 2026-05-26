@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PInvoke;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -97,7 +96,7 @@ namespace FastGithub
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message, $"服务{action}异常");
+                logger.LogError(ex, $"服务{action}异常");
             }
             return true;
         }

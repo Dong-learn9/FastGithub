@@ -12,7 +12,9 @@ namespace FastGithub
     static class ResourceExtractor
     {
         /// <summary>
-        /// 释放所有需要的嵌入资源到磁盘（仅在文件不存在时释放）
+        /// 释放所有需要的嵌入资源到磁盘
+        /// dnscrypt-proxy 二进制：仅在不存在时释放（避免覆盖用户自定义配置）
+        /// appsettings 配置文件：始终释放（确保版本更新后配置同步）
         /// </summary>
         /// <param name="baseDirectory">基础目录</param>
         public static void ExtractIfNeeded(string baseDirectory)
@@ -60,7 +62,7 @@ namespace FastGithub
                 }
             }
 
-            // 释放 dnscrypt-proxy.toml 配置
+            // 释放 dnscrypt-proxy.toml 配置（仅在不存在时释放，保留用户自定义修改）
             var tomlTargetPath = Path.Combine(dnscryptDir, "dnscrypt-proxy.toml");
             if (!File.Exists(tomlTargetPath) && resourceNames.Contains("dnscrypt-proxy.toml"))
             {
@@ -70,16 +72,17 @@ namespace FastGithub
 
         /// <summary>
         /// 释放 appsettings 配置文件
+        /// 始终覆盖释放，确保版本更新后配置与程序匹配
         /// </summary>
         private static void ExtractAppsettings(Assembly assembly, string[] resourceNames, string baseDirectory)
         {
-            // 释放 appsettings.json
-            if (!File.Exists(Path.Combine(baseDirectory, "appsettings.json")) && resourceNames.Contains("appsettings.json"))
+            // 释放 appsettings.json（始终覆盖）
+            if (resourceNames.Contains("appsettings.json"))
             {
                 ExtractResource(assembly, "appsettings.json", Path.Combine(baseDirectory, "appsettings.json"));
             }
 
-            // 释放 appsettings/*.json
+            // 释放 appsettings/*.json（始终覆盖）
             var appsettingsDir = Path.Combine(baseDirectory, "appsettings");
             Directory.CreateDirectory(appsettingsDir);
 
@@ -95,7 +98,7 @@ namespace FastGithub
                 var resourceName = $"{prefix}.json";
                 var targetPath = Path.Combine(appsettingsDir, resourceName);
 
-                if (!File.Exists(targetPath) && resourceNames.Contains(resourceName))
+                if (resourceNames.Contains(resourceName))
                 {
                     ExtractResource(assembly, resourceName, targetPath);
                 }

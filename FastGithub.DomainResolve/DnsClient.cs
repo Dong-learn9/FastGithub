@@ -59,13 +59,12 @@ namespace FastGithub.DomainResolve
             this.logger = logger;
 
             // 缓存过期时清理对应的信号量，防止内存泄漏
-            this.dnsLookupCache = new MemoryCache(Options.Create(new MemoryCacheOptions()), new PostEvictionCallbacks
+            var cacheOptions = new MemoryCacheOptions();
+            cacheOptions.PostEvictionCallbacks.Add(new PostEvictionCallbackRegistration
             {
-                PostEvictionCallbacks = { new PostEvictionCallbackRegistration
-                {
-                    EvictionCallback = OnDnsLookupCacheEvicted
-                } }
+                EvictionCallback = OnDnsLookupCacheEvicted
             });
+            this.dnsLookupCache = new MemoryCache(Options.Create(cacheOptions));
         }
 
         /// <summary>
@@ -104,7 +103,6 @@ namespace FastGithub.DomainResolve
 
             // 并行向所有DNS服务器发起查询
             var lookupTasks = dnsServers.Select(dns => this.LookupAsync(dns, endPoint, fastSort, cancellationToken)).ToArray();
-            var completedLookupTasks = new List<Task<IList<IPAddress>>>();
 
             // 使用Task.WhenAny逐个收集最先返回的结果
             var remainingTasks = new HashSet<Task<IList<IPAddress>>>(lookupTasks);
@@ -113,9 +111,18 @@ namespace FastGithub.DomainResolve
                 var completedTask = await Task.WhenAny(remainingTasks);
                 remainingTasks.Remove(completedTask);
 
+                IList<IPAddress>? addresses = null;
                 try
                 {
-                    var addresses = await completedTask;
+                    addresses = await completedTask;
+                }
+                catch
+                {
+                    // 单个DNS服务器查询失败不影响其他
+                }
+
+                if (addresses != null)
+                {
                     foreach (var address in addresses)
                     {
                         if (hashSet.Add(address))
@@ -123,10 +130,6 @@ namespace FastGithub.DomainResolve
                             yield return address;
                         }
                     }
-                }
-                catch
-                {
-                    // 单个DNS服务器查询失败不影响其他
                 }
             }
         }

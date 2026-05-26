@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace FastGithub.Configuration
@@ -6,6 +7,7 @@ namespace FastGithub.Configuration
     /// <summary>
     /// 域名配置
     /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public record DomainConfig
     {
         /// <summary>

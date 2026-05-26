@@ -1,8 +1,11 @@
-﻿namespace FastGithub.Configuration
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace FastGithub.Configuration
 {
     /// <summary>
     /// 响应配置
     /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public record ResponseConfig
     {
         /// <summary>

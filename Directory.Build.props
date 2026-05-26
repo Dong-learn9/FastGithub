@@ -6,11 +6,16 @@
 		<IsWebConfigTransformDisabled>true</IsWebConfigTransformDisabled> 		
 		<Description>github加速神器</Description>
 		<Copyright>https://github.com/dotnetcore/FastGithub</Copyright>
-		<RuntimeIdentifier>win-x64</RuntimeIdentifier>	
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
+
+	<!-- Trimming 兼容性：抑制第三方库的 trimming 警告 -->
+	<PropertyGroup>
+		<NoWarn>$(NoWarn);IL2026;IL2087;IL2072;IL2057;IL2067;IL2075</NoWarn>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
 	</PropertyGroup>
 </Project>

@@ -19,12 +19,16 @@ namespace FastGithub.Configuration
         /// <typeparam name="T"></typeparam>
         /// <param name="reader"></param>
         /// <param name="writer"></param>
+        [UnconditionalSuppressMessage("Trimming", "IL2072:TargetParameterCount",
+            Justification = "TypeConverter泛型类型已通过DynamicallyAccessedMembers标注")]
         public static void Bind<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] T>(Func<string, T?> reader, Func<T?, string?> writer)
         {
             binders[typeof(T)] = new Binder<T>(reader, writer);
 
             var converterType = typeof(TypeConverter<>).MakeGenericType(typeof(T));
+#pragma warning disable IL2072 // Target method argument does not satisfy annotation requirements
             if (TypeDescriptor.GetConverter(typeof(T)).GetType() != converterType)
+#pragma warning restore IL2072
             {
                 TypeDescriptor.AddAttributes(typeof(T), new TypeConverterAttribute(converterType));
             }

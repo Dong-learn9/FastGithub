@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace FastGithub.Configuration
@@ -7,6 +8,7 @@ namespace FastGithub.Configuration
     /// <summary>
     /// FastGithub的配置
     /// </summary>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
     public class FastGithubOptions
     {
         /// <summary>

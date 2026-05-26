@@ -38,7 +38,7 @@ namespace FastGithub.HttpServer.HttpMiddlewares
         /// 处理请求
         /// </summary>
         /// <param name="context"></param>
-        /// <param name="next"?
+        /// <param name="next"></param>
         /// <returns></returns>
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
