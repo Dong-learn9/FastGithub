@@ -19,6 +19,10 @@ namespace FastGithub
             {
                 Environment.CurrentDirectory = contentRoot;
             }
+
+            // 单文件模式：释放嵌入的 dnscrypt-proxy 和 appsettings 到磁盘
+            ResourceExtractor.ExtractIfNeeded(Environment.CurrentDirectory);
+
             var options = new WebApplicationOptions
             {
                 Args = args,

@@ -45,6 +45,74 @@
 		</None>
 	</ItemGroup>
 
+	<!-- 单文件打包：嵌入 dnscrypt-proxy 二进制文件（按平台条件包含） -->
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+		<EmbeddedResource Include="..\@dnscrypt-proxy\win-x64\dnscrypt-proxy.exe">
+			<LogicalName>dnscrypt-proxy.exe</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+		<EmbeddedResource Include="..\@dnscrypt-proxy\linux-x64\dnscrypt-proxy">
+			<LogicalName>dnscrypt-proxy</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+		<EmbeddedResource Include="..\@dnscrypt-proxy\linux-arm64\dnscrypt-proxy">
+			<LogicalName>dnscrypt-proxy</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+		<EmbeddedResource Include="..\@dnscrypt-proxy\osx-x64\dnscrypt-proxy">
+			<LogicalName>dnscrypt-proxy</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+		<EmbeddedResource Include="..\@dnscrypt-proxy\osx-arm64\dnscrypt-proxy">
+			<LogicalName>dnscrypt-proxy</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<!-- 单文件打包：嵌入 dnscrypt-proxy 配置文件 -->
+	<ItemGroup>
+		<EmbeddedResource Include="..\@dnscrypt-proxy\dnscrypt-proxy.toml">
+			<LogicalName>dnscrypt-proxy.toml</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<!-- 单文件打包：嵌入 appsettings 配置文件 -->
+	<ItemGroup>
+		<EmbeddedResource Include="appsettings.json">
+			<LogicalName>appsettings.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.github.json">
+			<LogicalName>appsettings.github.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.google.json">
+			<LogicalName>appsettings.google.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.microsoft.json">
+			<LogicalName>appsettings.microsoft.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.packages.json">
+			<LogicalName>appsettings.packages.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.bootcss.json">
+			<LogicalName>appsettings.bootcss.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.fastly.json">
+			<LogicalName>appsettings.fastly.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.imgur.json">
+			<LogicalName>appsettings.imgur.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.v2ex.json">
+			<LogicalName>appsettings.v2ex.json</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="appsettings\appsettings.amazonaws.json">
+			<LogicalName>appsettings.amazonaws.json</LogicalName>
+		</EmbeddedResource>
+	</ItemGroup>
+
 	<ItemGroup>
 		<Folder Include="Properties\" />
 	</ItemGroup>

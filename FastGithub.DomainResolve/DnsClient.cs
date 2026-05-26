@@ -1,4 +1,4 @@
-﻿﻿using DNS.Client;
+﻿﻿﻿using DNS.Client;
 using DNS.Client.RequestResolver;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
