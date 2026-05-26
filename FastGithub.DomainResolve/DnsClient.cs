@@ -61,14 +61,19 @@ namespace FastGithub.DomainResolve
 
         /// <summary>
         /// 清理过期的信号量，防止内存泄漏
+        /// 同时检查 dnsLookupCache 和 dnsStateCache，避免误删 DNS 状态信号量
         /// </summary>
         internal void CompactSemaphoreSlims()
         {
             foreach (var key in this.semaphoreSlims.Keys)
             {
-                if (this.dnsLookupCache.TryGetValue(key, out _) == false)
+                if (this.dnsLookupCache.TryGetValue(key, out _) == false &&
+                    this.dnsStateCache.TryGetValue(key, out _) == false)
                 {
-                    this.semaphoreSlims.TryRemove(key, out _);
+                    if (this.semaphoreSlims.TryRemove(key, out var semaphore))
+                    {
+                        semaphore.Dispose();
+                    }
                 }
             }
         }

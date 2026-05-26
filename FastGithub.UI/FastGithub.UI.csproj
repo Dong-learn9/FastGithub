@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<OutputType>WinExe</OutputType>
 		<LangVersion>8.0</LangVersion> 
-		<TargetFramework>net45</TargetFramework>
+		<TargetFramework>net48</TargetFramework>
 		<ApplicationIcon>app.ico</ApplicationIcon>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>

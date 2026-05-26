@@ -22,7 +22,7 @@ namespace FastGithub.HttpServer.Certs
         private readonly IEnumerable<ICaCertInstaller> certInstallers;
         private readonly ILogger<CertService> logger;
         private readonly object caCertLock = new();
-        private X509Certificate2? caCert;
+        private volatile X509Certificate2? caCert;
 
 
         /// <summary>
@@ -62,23 +62,31 @@ namespace FastGithub.HttpServer.Certs
                 return false;
             }
 
-            File.Delete(this.CaCerFilePath);
-            File.Delete(this.CaKeyFilePath);
-
-            var notBefore = DateTimeOffset.Now.AddDays(-1);
-            var notAfter = DateTimeOffset.Now.AddYears(10);
-
-            var subjectName = new X500DistinguishedName($"CN={nameof(FastGithub)}");
-            this.caCert = CertGenerator.CreateCACertificate(subjectName, notBefore, notAfter);
-
-            var privateKeyPem = this.caCert.GetRSAPrivateKey()?.ExportRSAPrivateKeyPem();
-            if (privateKeyPem != null)
+            lock (this.caCertLock)
             {
-                File.WriteAllText(this.CaKeyFilePath, new string(privateKeyPem), Encoding.ASCII);
-            }
+                if (File.Exists(this.CaCerFilePath) && File.Exists(this.CaKeyFilePath))
+                {
+                    return false;
+                }
 
-            var certPem = this.caCert.ExportCertificatePem();
-            File.WriteAllText(this.CaCerFilePath, new string(certPem), Encoding.ASCII);
+                File.Delete(this.CaCerFilePath);
+                File.Delete(this.CaKeyFilePath);
+
+                var notBefore = DateTimeOffset.Now.AddDays(-1);
+                var notAfter = DateTimeOffset.Now.AddYears(10);
+
+                var subjectName = new X500DistinguishedName($"CN={nameof(FastGithub)}");
+                this.caCert = CertGenerator.CreateCACertificate(subjectName, notBefore, notAfter);
+
+                var privateKeyPem = this.caCert.GetRSAPrivateKey()?.ExportRSAPrivateKeyPem();
+                if (privateKeyPem != null)
+                {
+                    File.WriteAllText(this.CaKeyFilePath, new string(privateKeyPem), Encoding.ASCII);
+                }
+
+                var certPem = this.caCert.ExportCertificatePem();
+                File.WriteAllText(this.CaCerFilePath, new string(certPem), Encoding.ASCII);
+            }
 
             return true;
         }

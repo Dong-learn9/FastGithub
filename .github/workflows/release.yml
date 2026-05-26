@@ -93,14 +93,7 @@ jobs:
       if: matrix.runtime == 'win-x64'
       shell: pwsh
       run: |
-        # FastGithub.UI 是 .NET Framework 4.5 项目，需要用 MSBuild 发布
-        $msbuild = &"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | Select-Object -First 1
-        if ($msbuild) {
-          & $msbuild FastGithub.UI/FastGithub.UI.csproj /p:Configuration=Release /p:OutputPath=../../publish/${{ matrix.runtime }}
-        } else {
-          # 回退到 dotnet publish（可能不适用于 net45）
-          dotnet publish FastGithub.UI/FastGithub.UI.csproj -c Release -o ./publish/${{ matrix.runtime }}
-        }
+        dotnet build FastGithub.UI/FastGithub.UI.csproj -c Release -o ./publish/${{ matrix.runtime }}
 
     - name: Create archive  
       shell: bash  

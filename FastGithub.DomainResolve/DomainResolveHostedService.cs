@@ -100,6 +100,11 @@ namespace FastGithub.DomainResolve
                     this.logger.LogInformation("dnscrypt-proxy已就绪");
                     return;
                 }
+                catch (OperationCanceledException)
+                {
+                    this.logger.LogWarning("dnscrypt-proxy未在{seconds}秒内就绪，将使用FallbackDns解析域名", this.dnscryptProxyMaxDelay.TotalSeconds);
+                    return;
+                }
                 catch
                 {
                     await Task.Delay(200, linkedTokenSource.Token);
