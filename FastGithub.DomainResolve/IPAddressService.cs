@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -95,7 +95,7 @@ namespace FastGithub.DomainResolve
         {
             if (this.addressElapsedCache.TryGetValue<AddressElapsed>(endPoint, out var addressElapsed))
             {
-                return addressElapsed;
+                return addressElapsed!;
             }
 
             var stopWatch = Stopwatch.StartNew();

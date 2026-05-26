@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using FastGithub.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

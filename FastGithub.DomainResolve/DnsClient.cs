@@ -1,4 +1,4 @@
-﻿﻿﻿using DNS.Client;
+﻿﻿﻿﻿using DNS.Client;
 using DNS.Client.RequestResolver;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
@@ -210,7 +210,7 @@ namespace FastGithub.DomainResolve
             {
                 if (this.dnsLookupCache.TryGetValue<IList<IPAddress>>(key, out var value))
                 {
-                    return value;
+                    return value!;
                 }
                 var result = await this.LookupCoreAsync(dns, endPoint, fastSort, cancellationToken);
                 return this.dnsLookupCache.Set(key, result.Addresses, result.TimeToLive);

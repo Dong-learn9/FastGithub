@@ -1,4 +1,4 @@
-﻿﻿﻿using FastGithub.Configuration;
+﻿﻿﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Runtime.Versioning;
 
