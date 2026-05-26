@@ -92,7 +92,6 @@ jobs:
           -r ${{ matrix.runtime }} \
           --self-contained true \
           -p:PublishSingleFile=true \
-          -p:PublishTrimmed=true \
           -p:EnableCompressionInSingleFile=true \
           -o ./publish/${{ matrix.runtime }}
   

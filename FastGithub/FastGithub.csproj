@@ -6,6 +6,9 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<!-- Trimming 兼容性：允许 PublishTrimmed 但抑制分析器警告 -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>partial</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
