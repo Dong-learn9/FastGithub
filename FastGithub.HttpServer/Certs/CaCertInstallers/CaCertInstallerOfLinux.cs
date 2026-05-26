@@ -1,4 +1,4 @@
-﻿using FastGithub;
+﻿﻿using FastGithub;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
@@ -71,7 +71,7 @@ namespace FastGithub.HttpServer.Certs.CaCertInstallers
             catch (Exception ex)
             {
                 File.Delete(destCertFilePath);
-                logger.LogWarning(ex.Message, "自动安装CA证书异常");
+                logger.LogWarning(ex, "自动安装CA证书异常");
             }
         }
     }

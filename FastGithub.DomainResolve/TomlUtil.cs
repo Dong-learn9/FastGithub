@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -9,7 +9,7 @@ using Tommy;
 namespace FastGithub.DomainResolve
 {
     /// <summary>
-    /// doml配置工具
+    /// toml配置工具
     /// </summary>
     static class TomlUtil
     {

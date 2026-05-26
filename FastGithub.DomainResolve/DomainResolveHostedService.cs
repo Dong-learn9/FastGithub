@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,7 +15,7 @@ namespace FastGithub.DomainResolve
         private readonly DnscryptProxy dnscryptProxy;
         private readonly IDomainResolver domainResolver;
         private readonly ILogger<DomainResolveHostedService> logger;
-        private readonly TimeSpan dnscryptProxyInitDelay = TimeSpan.FromSeconds(5d);
+        private readonly TimeSpan dnscryptProxyMaxDelay = TimeSpan.FromSeconds(5d);
         private readonly TimeSpan testPeriodTimeSpan = TimeSpan.FromSeconds(1d);
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace FastGithub.DomainResolve
             try
             {
                 await this.dnscryptProxy.StartAsync(stoppingToken);
-                await Task.Delay(dnscryptProxyInitDelay, stoppingToken);
+                await this.WaitForDnscryptProxyAsync(stoppingToken);
 
                 while (stoppingToken.IsCancellationRequested == false)
                 {
@@ -56,6 +57,38 @@ namespace FastGithub.DomainResolve
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "域名解析异常");
+            }
+        }
+
+        /// <summary>
+        /// 动态等待dnscrypt-proxy就绪，替代固定5秒延迟
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        private async Task WaitForDnscryptProxyAsync(CancellationToken cancellationToken)
+        {
+            var endPoint = this.dnscryptProxy.LocalEndPoint;
+            if (endPoint == null)
+            {
+                return;
+            }
+
+            using var timeoutTokenSource = new CancellationTokenSource(this.dnscryptProxyMaxDelay);
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutTokenSource.Token);
+
+            while (linkedTokenSource.IsCancellationRequested == false)
+            {
+                try
+                {
+                    using var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    await socket.ConnectAsync(endPoint, linkedTokenSource.Token);
+                    this.logger.LogInformation("dnscrypt-proxy已就绪");
+                    return;
+                }
+                catch
+                {
+                    await Task.Delay(200, linkedTokenSource.Token);
+                }
             }
         }
 

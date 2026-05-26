@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,6 +21,7 @@ namespace FastGithub.HttpServer.Certs
         private readonly IMemoryCache serverCertCache;
         private readonly IEnumerable<ICaCertInstaller> certInstallers;
         private readonly ILogger<CertService> logger;
+        private readonly object caCertLock = new();
         private X509Certificate2? caCert;
 
 
@@ -71,7 +72,10 @@ namespace FastGithub.HttpServer.Certs
             this.caCert = CertGenerator.CreateCACertificate(subjectName, notBefore, notAfter);
 
             var privateKeyPem = this.caCert.GetRSAPrivateKey()?.ExportRSAPrivateKeyPem();
-            File.WriteAllText(this.CaKeyFilePath, new string(privateKeyPem), Encoding.ASCII);
+            if (privateKeyPem != null)
+            {
+                File.WriteAllText(this.CaKeyFilePath, new string(privateKeyPem), Encoding.ASCII);
+            }
 
             var certPem = this.caCert.ExportCertificatePem();
             File.WriteAllText(this.CaCerFilePath, new string(certPem), Encoding.ASCII);
@@ -131,9 +135,15 @@ namespace FastGithub.HttpServer.Certs
         {
             if (this.caCert == null)
             {
-                using var rsa = RSA.Create();
-                rsa.ImportFromPem(File.ReadAllText(this.CaKeyFilePath));
-                this.caCert = new X509Certificate2(this.CaCerFilePath).CopyWithPrivateKey(rsa);
+                lock (this.caCertLock)
+                {
+                    if (this.caCert == null)
+                    {
+                        using var rsa = RSA.Create();
+                        rsa.ImportFromPem(File.ReadAllText(this.CaKeyFilePath));
+                        this.caCert = new X509Certificate2(this.CaCerFilePath).CopyWithPrivateKey(rsa);
+                    }
+                }
             }
 
             var key = $"{nameof(CertService)}:{domain}";

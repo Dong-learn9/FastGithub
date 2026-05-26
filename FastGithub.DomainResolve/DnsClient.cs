@@ -1,4 +1,4 @@
-﻿using DNS.Client;
+﻿﻿using DNS.Client;
 using DNS.Client.RequestResolver;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
@@ -32,7 +32,7 @@ namespace FastGithub.DomainResolve
 
         private readonly ConcurrentDictionary<string, SemaphoreSlim> semaphoreSlims = new();
         private readonly IMemoryCache dnsStateCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
-        private readonly IMemoryCache dnsLookupCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+        private readonly IMemoryCache dnsLookupCache;
 
         private readonly TimeSpan stateExpiration = TimeSpan.FromMinutes(5d);
         private readonly TimeSpan minTimeToLive = TimeSpan.FromSeconds(30d);
@@ -57,6 +57,26 @@ namespace FastGithub.DomainResolve
             this.dnscryptProxy = dnscryptProxy;
             this.fastGithubConfig = fastGithubConfig;
             this.logger = logger;
+
+            // 缓存过期时清理对应的信号量，防止内存泄漏
+            this.dnsLookupCache = new MemoryCache(Options.Create(new MemoryCacheOptions()), new PostEvictionCallbacks
+            {
+                PostEvictionCallbacks = { new PostEvictionCallbackRegistration
+                {
+                    EvictionCallback = OnDnsLookupCacheEvicted
+                } }
+            });
+        }
+
+        /// <summary>
+        /// DNS查询缓存过期回调，清理不再需要的信号量
+        /// </summary>
+        private void OnDnsLookupCacheEvicted(object key, object? value, EvictionReason reason, object? state)
+        {
+            if (key is string cacheKey)
+            {
+                this.semaphoreSlims.TryRemove(cacheKey, out _);
+            }
         }
 
         /// <summary>
@@ -69,15 +89,44 @@ namespace FastGithub.DomainResolve
         public async IAsyncEnumerable<IPAddress> ResolveAsync(DnsEndPoint endPoint, bool fastSort, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var hashSet = new HashSet<IPAddress>();
+
+            // 并行查询所有DNS服务器，谁先返回用谁，合并去重结果
+            var dnsServers = new List<IPEndPoint>();
             await foreach (var dns in this.GetDnsServersAsync(cancellationToken))
             {
-                var addresses = await this.LookupAsync(dns, endPoint, fastSort, cancellationToken);
-                foreach (var address in addresses)
+                dnsServers.Add(dns);
+            }
+
+            if (dnsServers.Count == 0)
+            {
+                yield break;
+            }
+
+            // 并行向所有DNS服务器发起查询
+            var lookupTasks = dnsServers.Select(dns => this.LookupAsync(dns, endPoint, fastSort, cancellationToken)).ToArray();
+            var completedLookupTasks = new List<Task<IList<IPAddress>>>();
+
+            // 使用Task.WhenAny逐个收集最先返回的结果
+            var remainingTasks = new HashSet<Task<IList<IPAddress>>>(lookupTasks);
+            while (remainingTasks.Count > 0)
+            {
+                var completedTask = await Task.WhenAny(remainingTasks);
+                remainingTasks.Remove(completedTask);
+
+                try
                 {
-                    if (hashSet.Add(address) == true)
+                    var addresses = await completedTask;
+                    foreach (var address in addresses)
                     {
-                        yield return address;
+                        if (hashSet.Add(address))
+                        {
+                            yield return address;
+                        }
                     }
+                }
+                catch
+                {
+                    // 单个DNS服务器查询失败不影响其他
                 }
             }
         }
@@ -259,7 +308,7 @@ namespace FastGithub.DomainResolve
         }
 
         /// <summary>
-        /// 获取IP记录
+        /// 获取IP记录（A和AAAA记录并行查询）
         /// </summary>
         /// <param name="resolver"></param>
         /// <param name="domain"></param> 
@@ -268,15 +317,20 @@ namespace FastGithub.DomainResolve
         private static async Task<IList<IPAddressResourceRecord>> GetAddressRecordsAsync(IRequestResolver resolver, string domain, CancellationToken cancellationToken)
         {
             var addressRecords = new List<IPAddressResourceRecord>();
+
+            var tasks = new List<Task<IEnumerable<IPAddressResourceRecord>>>();
             if (Socket.OSSupportsIPv4 == true)
             {
-                var records = await GetRecordsAsync(RecordType.A);
-                addressRecords.AddRange(records);
+                tasks.Add(GetRecordsAsync(RecordType.A));
             }
-
             if (Socket.OSSupportsIPv6 == true)
             {
-                var records = await GetRecordsAsync(RecordType.AAAA);
+                tasks.Add(GetRecordsAsync(RecordType.AAAA));
+            }
+
+            var results = await Task.WhenAll(tasks);
+            foreach (var records in results)
+            {
                 addressRecords.AddRange(records);
             }
             return addressRecords;

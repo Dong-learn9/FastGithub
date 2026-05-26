@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Win32;
@@ -53,7 +53,7 @@ namespace FastGithub.PacketIntercept.Dns
         /// <returns></returns>
         public Task SolveAsync(CancellationToken cancellationToken)
         {
-            this.SetToProxyOvride();
+            this.SetToProxyOverride();
             this.CheckProxyConflict();
             return Task.CompletedTask;
         }
@@ -65,14 +65,14 @@ namespace FastGithub.PacketIntercept.Dns
         /// <returns></returns>
         public Task RestoreAsync(CancellationToken cancellationToken)
         {
-            this.RemoveFromProxyOvride();
+            this.RemoveFromProxyOverride();
             return Task.CompletedTask;
         }
 
         /// <summary>
-        /// 添加到ProxyOvride
+        /// 添加到ProxyOverride
         /// </summary>
-        private void SetToProxyOvride()
+        private void SetToProxyOverride()
         {
             using var settings = Registry.CurrentUser.OpenSubKey(INTERNET_SETTINGS, writable: true);
             if (settings == null)
@@ -81,17 +81,17 @@ namespace FastGithub.PacketIntercept.Dns
             }
 
             var items = this.options.Value.DomainConfigs.Keys.ToHashSet();
-            foreach (var item in GetProxyOvride(settings))
+            foreach (var item in GetProxyOverride(settings))
             {
                 items.Add(item);
             }
-            SetProxyOvride(settings, items);
+            SetProxyOverride(settings, items);
         }
 
         /// <summary>
-        /// 从ProxyOvride移除
+        /// 从ProxyOverride移除
         /// </summary>
-        private void RemoveFromProxyOvride()
+        private void RemoveFromProxyOverride()
         {
             using var settings = Registry.CurrentUser.OpenSubKey(INTERNET_SETTINGS, writable: true);
             if (settings == null)
@@ -99,9 +99,9 @@ namespace FastGithub.PacketIntercept.Dns
                 return;
             }
 
-            var proxyOvride = GetProxyOvride(settings);
+            var proxyOvride = GetProxyOverride(settings);
             var items = proxyOvride.Except(this.options.Value.DomainConfigs.Keys);
-            SetProxyOvride(settings, items);
+            SetProxyOverride(settings, items);
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace FastGithub.PacketIntercept.Dns
         /// </summary>
         /// <param name="registryKey"></param>
         /// <returns></returns>
-        private static string[] GetProxyOvride(RegistryKey registryKey)
+        private static string[] GetProxyOverride(RegistryKey registryKey)
         {
             var value = registryKey.GetValue(PROXYOVERRIDE_KEY, null)?.ToString();
             if (value == null)
@@ -150,7 +150,7 @@ namespace FastGithub.PacketIntercept.Dns
         /// </summary>
         /// <param name="registryKey"></param>
         /// <param name="items"></param>
-        private static void SetProxyOvride(RegistryKey registryKey, IEnumerable<string> items)
+        private static void SetProxyOverride(RegistryKey registryKey, IEnumerable<string> items)
         {
             var value = string.Join(PROXYOVERRIDE_SEPARATOR, items);
             registryKey.SetValue(PROXYOVERRIDE_KEY, value, RegistryValueKind.String);

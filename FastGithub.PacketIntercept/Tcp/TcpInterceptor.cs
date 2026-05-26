@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿﻿using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
 using System.Net;
@@ -72,7 +72,7 @@ namespace FastGithub.PacketIntercept.Tcp
                 }
                 catch (Exception ex)
                 {
-                    this.logger.LogWarning(ex.Message);
+                    this.logger.LogWarning(ex, "修改TCP数据包异常");
                 }
                 finally
                 {

@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace FastGithub.PacketIntercept.Dns
 {
     /// <summary>
-    /// host文件冲解决者
+    /// host文件冲突解决者
     /// </summary>
     [SupportedOSPlatform("windows")]
     sealed class HostsConflictSolver : IDnsConflictSolver
@@ -19,7 +19,7 @@ namespace FastGithub.PacketIntercept.Dns
         private readonly ILogger<HostsConflictSolver> logger;
 
         /// <summary>
-        /// host文件冲解决者
+        /// host文件冲突解决者
         /// </summary>
         /// <param name="fastGithubConfig"></param>
         /// <param name="logger"></param>

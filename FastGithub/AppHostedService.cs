@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -156,7 +156,8 @@ namespace FastGithub
 
             try
             {
-                Process.GetProcessById(parentId).WaitForExit();
+                var process = Process.GetProcessById(parentId);
+                await Task.Run(() => process.WaitForExit());
             }
             catch (Exception ex)
             {

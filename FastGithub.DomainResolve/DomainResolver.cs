@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+﻿﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -40,9 +40,10 @@ namespace FastGithub.DomainResolve
             this.addressService = addressService;
             this.logger = logger;
 
-            foreach (var endPoint in persistence.ReadDnsEndPoints())
+            // 从磁盘恢复域名及其上次的IP地址缓存
+            foreach (var kv in persistence.ReadDnsEndPointsAsync().GetAwaiter().GetResult())
             {
-                this.dnsEndPointAddress.TryAdd(endPoint, Array.Empty<IPAddress>());
+                this.dnsEndPointAddress.TryAdd(kv.Key, kv.Value);
             }
         }
 
@@ -65,12 +66,12 @@ namespace FastGithub.DomainResolve
             {
                 if (this.dnsEndPointAddress.TryAdd(endPoint, Array.Empty<IPAddress>()))
                 {
-                    await this.persistence.WriteDnsEndPointsAsync(this.dnsEndPointAddress.Keys, cancellationToken);
+                    await this.persistence.WriteDnsEndPointsAsync(this.dnsEndPointAddress, cancellationToken);
                 }
 
-                await foreach (var adddress in this.dnsClient.ResolveAsync(endPoint, fastSort: true, cancellationToken))
+                await foreach (var address in this.dnsClient.ResolveAsync(endPoint, fastSort: true, cancellationToken))
                 {
-                    yield return adddress;
+                    yield return address;
                 }
             }
         }
@@ -82,7 +83,9 @@ namespace FastGithub.DomainResolve
         /// <returns></returns>
         public async Task TestSpeedAsync(CancellationToken cancellationToken)
         {
-            foreach (var keyValue in this.dnsEndPointAddress.OrderBy(item => item.Value.Length))
+            // 并行测速：所有域名同时测速，而非串行等待
+            var items = this.dnsEndPointAddress.OrderBy(item => item.Value.Length).ToList();
+            var tasks = items.Select(async keyValue =>
             {
                 var dnsEndPoint = keyValue.Key;
                 var oldAddresses = keyValue.Value;
@@ -97,7 +100,12 @@ namespace FastGithub.DomainResolve
                     var addressArray = string.Join(", ", newSegmentums.Select(item => item.ToString()));
                     this.logger.LogInformation($"{dnsEndPoint.Host}:{dnsEndPoint.Port}->[{addressArray}]");
                 }
-            }
+            });
+
+            await Task.WhenAll(tasks);
+
+            // 测速完成后持久化IP地址到磁盘
+            await this.persistence.WriteDnsEndPointsAsync(this.dnsEndPointAddress, cancellationToken);
         }
     }
 }

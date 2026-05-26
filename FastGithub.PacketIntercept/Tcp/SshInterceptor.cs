@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Runtime.Versioning;
 
@@ -14,7 +14,7 @@ namespace FastGithub.PacketIntercept.Tcp
         /// ssh拦截器
         /// </summary>
         /// <param name="logger"></param>
-        public SshInterceptor(ILogger<HttpInterceptor> logger)
+        public SshInterceptor(ILogger<SshInterceptor> logger)
             : base(22, GlobalListener.SshPort, logger)
         {
         }

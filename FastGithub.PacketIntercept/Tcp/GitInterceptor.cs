@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Runtime.Versioning;
 
@@ -14,7 +14,7 @@ namespace FastGithub.PacketIntercept.Tcp
         /// git拦截器
         /// </summary>
         /// <param name="logger"></param>
-        public GitInterceptor(ILogger<HttpInterceptor> logger)
+        public GitInterceptor(ILogger<GitInterceptor> logger)
             : base(9418, GlobalListener.GitPort, logger)
         {
         }

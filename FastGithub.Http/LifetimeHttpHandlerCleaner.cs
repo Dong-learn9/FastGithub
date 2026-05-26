@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -46,12 +46,27 @@ namespace FastGithub.Http
         /// <summary>
         /// 启动清理作业
         /// </summary>
-        private async void StartCleanup()
+        private void StartCleanup()
         {
-            await Task.Yield();
-            while (this.Cleanup() == false)
+            _ = StartCleanupAsync();
+        }
+
+        /// <summary>
+        /// 异步清理作业
+        /// </summary>
+        private async Task StartCleanupAsync()
+        {
+            try
             {
-                await Task.Delay(this.CleanupInterval);
+                await Task.Yield();
+                while (this.Cleanup() == false)
+                {
+                    await Task.Delay(this.CleanupInterval);
+                }
+            }
+            catch
+            {
+                // 防止未观察到的异常导致进程崩溃
             }
         }
 

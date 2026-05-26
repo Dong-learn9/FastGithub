@@ -1,4 +1,4 @@
-﻿using DNS.Protocol;
+﻿﻿using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
 using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
@@ -76,7 +76,7 @@ namespace FastGithub.PacketIntercept.Dns
                 }
                 catch (Exception ex)
                 {
-                    this.logger.LogWarning(ex.Message);
+                    this.logger.LogWarning(ex, "修改DNS数据包异常");
                 }
                 finally
                 {

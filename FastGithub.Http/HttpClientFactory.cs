@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using FastGithub.DomainResolve;
 using System;
 using System.Collections.Concurrent;
@@ -15,7 +15,7 @@ namespace FastGithub.Http
         /// <summary>
         /// 首次生命周期
         /// </summary>
-        private readonly TimeSpan firstLiftTime = TimeSpan.FromSeconds(10d);
+        private readonly TimeSpan firstLifeTime = TimeSpan.FromSeconds(10d);
 
         /// <summary>
         /// 非首次生命周期
@@ -56,7 +56,7 @@ namespace FastGithub.Http
 
             Lazy<LifetimeHttpHandler> CreateLifetimeHttpHandlerLazy(LifeTimeKey lifeTimeKey)
             {
-                return new Lazy<LifetimeHttpHandler>(() => this.CreateLifetimeHttpHandler(lifeTimeKey, this.firstLiftTime), true);
+                return new Lazy<LifetimeHttpHandler>(() => this.CreateLifetimeHttpHandler(lifeTimeKey, this.firstLifeTime), true);
             }
         }
 

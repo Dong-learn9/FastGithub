@@ -1,4 +1,4 @@
-﻿namespace FastGithub.FlowAnalyze
+﻿﻿namespace FastGithub.FlowAnalyze
 {
     /// <summary>
     /// 流量类型
@@ -13,6 +13,6 @@
         /// <summary>
         /// 写入
         /// </summary>
-        Wirte
+        Write
     }
 }

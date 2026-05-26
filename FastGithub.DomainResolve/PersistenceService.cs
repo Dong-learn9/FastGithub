@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace FastGithub.DomainResolve
         private readonly ILogger<PersistenceService> logger;
 
 
-        private record EndPointItem(string Host, int Port);
+        private record EndPointItem(string Host, int Port, string[]? Addresses);
 
         [JsonSerializable(typeof(EndPointItem[]))]
         [JsonSourceGenerationOptions(
@@ -50,41 +50,53 @@ namespace FastGithub.DomainResolve
 
 
         /// <summary>
-        /// 读取保存的节点
+        /// 读取保存的节点及其IP地址
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public IList<DnsEndPoint> ReadDnsEndPoints()
+        public async Task<IDictionary<DnsEndPoint, IPAddress[]>> ReadDnsEndPointsAsync(CancellationToken cancellationToken = default)
         {
+            var result = new Dictionary<DnsEndPoint, IPAddress[]>();
+
             if (File.Exists(dataFile) == false)
             {
-                return Array.Empty<DnsEndPoint>();
+                return result;
             }
 
             try
             {
-                dataLocker.Wait();
+                await dataLocker.WaitAsync(cancellationToken);
 
-                var utf8Json = File.ReadAllBytes(dataFile);
+                var utf8Json = await File.ReadAllBytesAsync(dataFile, cancellationToken);
                 var endPointItems = JsonSerializer.Deserialize(utf8Json, EndPointItemsContext.Default.EndPointItemArray);
                 if (endPointItems == null)
                 {
-                    return Array.Empty<DnsEndPoint>();
+                    return result;
                 }
 
-                var dnsEndPoints = new List<DnsEndPoint>();
                 foreach (var item in endPointItems)
                 {
                     if (this.fastGithubConfig.IsMatch(item.Host) == true)
                     {
-                        dnsEndPoints.Add(new DnsEndPoint(item.Host, item.Port));
+                        var endPoint = new DnsEndPoint(item.Host, item.Port);
+                        var addresses = Array.Empty<IPAddress>();
+                        if (item.Addresses != null)
+                        {
+                            addresses = item.Addresses
+                                .Select(a => IPAddress.TryParse(a, out var ip) ? ip : null)
+                                .Where(a => a != null)
+                                .Cast<IPAddress>()
+                                .ToArray();
+                        }
+                        result[endPoint] = addresses;
                     }
                 }
-                return dnsEndPoints;
+                return result;
             }
             catch (Exception ex)
             {
-                this.logger.LogWarning(ex.Message, "读取dns记录异常");
-                return Array.Empty<DnsEndPoint>();
+                this.logger.LogWarning(ex, "读取dns记录异常");
+                return result;
             }
             finally
             {
@@ -93,24 +105,28 @@ namespace FastGithub.DomainResolve
         }
 
         /// <summary>
-        /// 保存节点到文件
+        /// 保存节点及其IP地址到文件
         /// </summary>
-        /// <param name="dnsEndPoints"></param>
+        /// <param name="dnsEndPointAddresses"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task WriteDnsEndPointsAsync(IEnumerable<DnsEndPoint> dnsEndPoints, CancellationToken cancellationToken)
+        public async Task WriteDnsEndPointsAsync(IEnumerable<KeyValuePair<DnsEndPoint, IPAddress[]>> dnsEndPointAddresses, CancellationToken cancellationToken)
         {
             try
             {
                 await dataLocker.WaitAsync(CancellationToken.None);
 
-                var endPointItems = dnsEndPoints.Select(item => new EndPointItem(item.Host, item.Port)).ToArray();
+                var endPointItems = dnsEndPointAddresses.Select(item => new EndPointItem(
+                    item.Key.Host,
+                    item.Key.Port,
+                    item.Value.Select(a => a.ToString()).ToArray()
+                )).ToArray();
                 var utf8Json = JsonSerializer.SerializeToUtf8Bytes(endPointItems, EndPointItemsContext.Default.EndPointItemArray);
                 await File.WriteAllBytesAsync(dataFile, utf8Json, cancellationToken);
             }
             catch (Exception ex)
             {
-                this.logger.LogWarning(ex.Message, "保存dns记录异常");
+                this.logger.LogWarning(ex, "保存dns记录异常");
             }
             finally
             {

@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+﻿﻿using FastGithub.Configuration;
 using FastGithub.HttpServer.TcpMiddlewares;
 using Microsoft.AspNetCore.Http;
 using System.IO;
@@ -53,16 +53,16 @@ namespace FastGithub.HttpServer.HttpMiddlewares
         /// <returns></returns>
         private string CreateProxyPac(HostString proxyHost)
         {
-            var buidler = new StringBuilder();
-            buidler.AppendLine("function FindProxyForURL(url, host){");
-            buidler.AppendLine($"    var fastgithub = 'PROXY {proxyHost}';");
+            var builder = new StringBuilder();
+            builder.AppendLine("function FindProxyForURL(url, host){");
+            builder.AppendLine($"    var fastgithub = 'PROXY {proxyHost}';");
             foreach (var domain in fastGithubConfig.GetDomainPatterns())
             {
-                buidler.AppendLine($"    if (shExpMatch(host, '{domain}')) return fastgithub;");
+                builder.AppendLine($"    if (shExpMatch(host, '{domain}')) return fastgithub;");
             }
-            buidler.AppendLine("    return 'DIRECT';");
-            buidler.AppendLine("}");
-            return buidler.ToString();
+            builder.AppendLine("    return 'DIRECT';");
+            builder.AppendLine("}");
+            return builder.ToString();
         }
     }
 }
