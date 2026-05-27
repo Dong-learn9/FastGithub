@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+using FastGithub.Configuration;
 using FastGithub.DomainResolve;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Connections.Features;

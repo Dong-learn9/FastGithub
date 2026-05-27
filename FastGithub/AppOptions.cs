@@ -1,4 +1,4 @@
-﻿namespace FastGithub
+namespace FastGithub
 {
     /// <summary>
     /// app选项

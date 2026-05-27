@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Features;
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;

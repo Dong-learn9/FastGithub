@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+using FastGithub.Configuration;
 using FastGithub.HttpServer.Certs;
 using FastGithub.HttpServer.TcpMiddlewares;
 using FastGithub.HttpServer.TlsMiddlewares;

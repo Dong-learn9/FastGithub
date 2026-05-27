@@ -1,4 +1,4 @@
-﻿namespace FastGithub.FlowAnalyze
+namespace FastGithub.FlowAnalyze
 {
     /// <summary>
     /// 流量分析器

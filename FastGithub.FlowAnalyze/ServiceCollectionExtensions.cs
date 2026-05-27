@@ -1,4 +1,4 @@
-﻿using FastGithub.FlowAnalyze;
+using FastGithub.FlowAnalyze;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FastGithub

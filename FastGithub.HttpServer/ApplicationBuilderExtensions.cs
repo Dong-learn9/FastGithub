@@ -1,4 +1,4 @@
-﻿using FastGithub.HttpServer.HttpMiddlewares;
+using FastGithub.HttpServer.HttpMiddlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 

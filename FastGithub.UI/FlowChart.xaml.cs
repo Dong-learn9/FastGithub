@@ -1,4 +1,4 @@
-﻿using LiveCharts;
+using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Wpf;
 using Newtonsoft.Json;

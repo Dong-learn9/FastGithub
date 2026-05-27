@@ -1,4 +1,4 @@
-﻿using FastGithub.PacketIntercept;
+using FastGithub.PacketIntercept;
 using FastGithub.PacketIntercept.Dns;
 using FastGithub.PacketIntercept.Tcp;
 using Microsoft.Extensions.DependencyInjection;

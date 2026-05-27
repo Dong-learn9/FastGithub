@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+using FastGithub.Configuration;
 
 namespace FastGithub.Http
 {

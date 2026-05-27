@@ -1,4 +1,4 @@
-﻿using FastGithub.Configuration;
+using FastGithub.Configuration;
 using FastGithub.DomainResolve;
 using System.Net.Http;
 using System.Net.Http.Headers;

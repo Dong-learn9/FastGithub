@@ -19,6 +19,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Strip BOM from source files
+      shell: bash
+      run: |
+        find . -type f \( -name "*.cs" -o -name "*.csproj" -o -name "*.sln" -o -name "*.json" -o -name "*.toml" -o -name "*.props" -o -name "*.xaml" \) | while read f; do
+          if hexdump -C "$f" | head -1 | grep -q 'efbb bf'; then
+            sed -i '1s/^\xEF\xBB\xBF//' "$f"
+            echo "Stripped BOM: $f"
+          fi
+        done
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -48,6 +58,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Strip BOM from source files
+      shell: bash
+      run: |
+        find . -type f \( -name "*.cs" -o -name "*.csproj" -o -name "*.sln" -o -name "*.json" -o -name "*.toml" -o -name "*.props" -o -name "*.xaml" \) | while read f; do
+          if hexdump -C "$f" | head -1 | grep -q 'efbb bf'; then
+            sed -i '1s/^\xEF\xBB\xBF//' "$f"
+            echo "Stripped BOM: $f"
+          fi
+        done
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4

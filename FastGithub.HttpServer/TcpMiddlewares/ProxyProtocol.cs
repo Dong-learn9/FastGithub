@@ -1,4 +1,4 @@
-﻿namespace FastGithub.HttpServer.TcpMiddlewares
+namespace FastGithub.HttpServer.TcpMiddlewares
 {
     /// <summary>
     /// 代理协议

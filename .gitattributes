@@ -1,7 +1,23 @@
 ###############################################################################
-# Set default behavior to automatically normalize line endings.
+# Set default behavior to automatically normalize line endings and strip BOM.
 ###############################################################################
-* text=auto
+* text=auto eol=lf
+
+# Explicitly declare text files that should NOT have BOM
+*.cs text eol=lf
+*.csproj text eol=lf
+*.sln text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.props text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.xml text eol=lf
+*.config text eol=lf
+*.xaml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
 
 ###############################################################################
 # Set default behavior for command prompt diff.

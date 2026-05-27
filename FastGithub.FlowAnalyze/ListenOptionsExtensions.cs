@@ -1,4 +1,4 @@
-﻿using FastGithub.FlowAnalyze;
+using FastGithub.FlowAnalyze;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 

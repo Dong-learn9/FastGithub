@@ -1,4 +1,4 @@
-﻿using FastGithub.DomainResolve;
+using FastGithub.DomainResolve;
 
 namespace FastGithub.HttpServer.TcpMiddlewares
 {

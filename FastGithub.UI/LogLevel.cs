@@ -1,4 +1,4 @@
-﻿namespace FastGithub.UI
+namespace FastGithub.UI
 {
     /// <summary>
     /// 日志等级
