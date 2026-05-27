@@ -44,7 +44,7 @@ namespace FastGithub.HttpServer.Certs.CaCertInstallers
                 return;
             }
 
-            this.logger.LogWarning($"请手动安装CA证书{caCertFilePath}到"将所有的证书都放入下列存储"\\"受信任的根证书颁发机构"");
+            this.logger.LogWarning($"请手动安装CA证书{caCertFilePath}到「受信任的根证书颁发机构」");
         }
 
         /// <summary>
